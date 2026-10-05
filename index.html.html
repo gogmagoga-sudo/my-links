@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мои ссылки</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8a7f66">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Verdana, sans-serif;
+    background: #f4f1ea;
+    color: #2b2b2b;
+    min-height: 100vh;
+  }
+  header {
+    background: #fffdf7;
+    border-bottom: 2px solid #d8d2c4;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0;
+    color: #3a3a3a;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  #searchBox {
+    flex: 1;
+    min-width: 180px;
+    padding: 8px 12px;
+    border: 1px solid #c9c2b2;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+    outline: none;
+  }
+  #searchBox:focus { border-color: #8a7f66; box-shadow: 0 0 0 2px rgba(138,127,102,0.15); }
+
+  .mode-switch {
+    display: flex;
+    background: #eae4d6;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #c9c2b2;
+  }
+  .mode-switch button {
+    border: none;
+    background: transparent;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #5a5246;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  .mode-switch button.active {
+    background: #8a7f66;
+    color: #fff;
+  }
+  .mode-switch button:hover:not(.active) { background: #ddd6c5; }
+
+  .btn {
+    border: none;
+    background: #8a7f66;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: #6f6650; }
+  .btn.secondary { background: #b8b0a0; }
+  .btn.secondary:hover { background: #9d9482; }
+  .btn.danger { background: #a85a4a; }
+  .btn.danger:hover { background: #8a4839; }
+  .btn.small { padding: 4px 8px; font-size: 12px; }
+
+  .container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 16px 20px 60px;
+  }
+
+  /* Таблица */
+  .table-wrap {
+    background: #fffdf7;
+    border: 1px solid #e0dacb;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 140px 2fr 2.8fr 100px;
+    border-bottom: 1px solid #ece6d8;
+    align-items: center;
+    min-height: 48px;
+  }
+  .row:last-child { border-bottom: none; }
+  .row.head {
+    background: #f0ebdd;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6b6353;
+    min-height: 38px;
+  }
+  .cell {
+    padding: 8px 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row:not(.head):hover { background: #faf7ef; }
+
+  .group-header {
+    grid-column: 1 / -1;
+    background: #ece4d2;
+    border-top: 2px solid #ddd4bf;
+    border-bottom: 1px solid #ddd4bf;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #5a5246;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .group-header .count {
+    font-weight: 400;
+    color: #8a8272;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 11px;
+  }
+  .group-header.ungrouped {
+    background: #f3eee0;
+    color: #8a8272;
+    font-style: italic;
+  }
+
+  .link-title {
+    color: #2f6fa8;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    word-break: break-word;
+  }
+  .link-title:hover { text-decoration: underline; }
+
+  .note-text {
+    font-size: 13px;
+    color: #5a5246;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .theme-badge {
+    display: inline-block;
+    background: #e0d8c4;
+    color: #5a5246;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .theme-badge.empty { background: transparent; color: #b8b0a0; font-weight: 400; font-style: italic; }
+
+  .thumb-link {
+    display: inline-block;
+    line-height: 0;
+    border-radius: 4px;
+  }
+  .thumb {
+    width: 64px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ddd6c5;
+    display: block;
+    background: #f0ebdd;
+    cursor: pointer;
+    transition: opacity 0.12s;
+  }
+  .thumb:hover { opacity: 0.85; }
+  .thumb.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b8b0a0;
+    font-size: 10px;
+    cursor: default;
+  }
+  .thumb.placeholder:hover { opacity: 1; }
+
+  .empty {
+    padding: 40px;
+    text-align: center;
+    color: #999080;
+    font-style: italic;
+  }
+
+  /* Режим редактирования */
+  .edit-grid {
+    display: grid;
+    grid-template-columns: 140px 2fr 2.8fr 140px;
+    border-bottom: 1px solid #ece6d8;
+    align-items: start;
+    min-height: 48px;
+    background: #fffdf7;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .edit-grid.head {
+    background: #f0ebdd;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6b6353;
+    min-height: 38px;
+    align-items: center;
+  }
+  .edit-grid input,
+  .edit-grid textarea {
+    width: 100%;
+    border: 1px solid #d8d2c4;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    outline: none;
+    resize: vertical;
+  }
+  .edit-grid input:focus,
+  .edit-grid textarea:focus { border-color: #8a7f66; }
+  .edit-grid textarea { min-height: 38px; }
+  .edit-grid .cell { padding: 6px 8px; }
+  .edit-grid .actions {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .theme-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .theme-cell input {
+    flex: 1;
+    min-width: 0;
+  }
+  .drag-handle {
+    cursor: grab;
+    user-select: none;
+    color: #b8b0a0;
+    font-size: 16px;
+    line-height: 1;
+    padding: 4px 2px;
+    flex-shrink: 0;
+  }
+  .drag-handle:active { cursor: grabbing; }
+
+  .edit-group {
+    border-bottom: 1px solid #ece6d8;
+    transition: background 0.15s;
+  }
+  .edit-group.drop-target {
+    background: #eaf3fb;
+    outline: 2px dashed #2f6fa8;
+    outline-offset: -4px;
+  }
+  .edit-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #ece4d2;
+    border-top: 2px solid #ddd4bf;
+    font-weight: 700;
+    font-size: 12px;
+    color: #5a5246;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: background 0.15s;
+  }
+  .edit-group-header.ungrouped {
+    background: #f3eee0;
+    color: #8a8272;
+    font-style: italic;
+  }
+  .edit-group-header input {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #d8d2c4;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #3a3a3a;
+    outline: none;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .edit-group-header input:focus { border-color: #8a7f66; }
+  .edit-group-header .group-count {
+    font-weight: 400;
+    color: #8a8272;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .dragging { opacity: 0.35; }
+  .drop-indicator-above { box-shadow: inset 0 3px 0 0 #2f6fa8; }
+  .drop-indicator-below { box-shadow: inset 0 -3px 0 0 #2f6fa8; }
+
+  .thumb-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .thumb-preview-box {
+    width: 100%;
+    height: 60px;
+    border: 1px dashed #c9c2b2;
+    border-radius: 4px;
+    background: #faf7ef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .thumb-preview-box:hover { border-color: #8a7f66; background: #f5f0e2; }
+  .thumb-preview-box.dragover {
+    border-color: #2f6fa8;
+    background: #e8f0fa;
+  }
+  .thumb-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .thumb-preview-box .hint-inline {
+    color: #a89f8d;
+    font-size: 10px;
+    text-align: center;
+    padding: 0 6px;
+    line-height: 1.3;
+    pointer-events: none;
+  }
+  .thumb-buttons {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .thumb-buttons .btn.small {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 4px;
+    font-size: 10px;
+  }
+  .paste-hint {
+    font-size: 10px;
+    color: #8a8272;
+    line-height: 1.2;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: #8a8272;
+    margin: 10px 0 0;
+    line-height: 1.5;
+  }
+  .hint code {
+    background: #ece6d8;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 11px;
+  }
+  .hint b { color: #5a5246; }
+
+  /* Тост-уведомления */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #3a3a3a;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.error { background: #a85a4a; }
+  .toast.success { background: #4a7a4a; }
+
+  @media (max-width: 800px) {
+    .row, .edit-grid { grid-template-columns: 100px 1.4fr 2fr 80px; }
+    .thumb { width: 48px; height: 34px; }
+    header { padding: 10px 12px; gap: 8px; }
+    h1 { font-size: 16px; }
+    .io-buttons .btn span.label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📒 Мои ссылки</h1>
+  <input id="searchBox" type="text" placeholder="Поиск по теме, названию, адресу или описанию…">
+  <div class="mode-switch">
+    <button id="modeViewBtn" class="active">Просмотр</button>
+    <button id="modeEditBtn">Редактирование</button>
+  </div>
+  <div class="io-buttons" style="display:flex; gap:6px;">
+    <button id="exportBtn" class="btn secondary" title="Скачать все ссылки в JSON-файл">⬇ <span class="label">Экспорт</span></button>
+    <button id="importBtn" class="btn secondary" title="Загрузить ссылки из JSON-файла">⬆ <span class="label">Импорт</span></button>
+  </div>
+  <button id="addBtn" class="btn" style="display:none;">+ Добавить</button>
+  <input type="file" id="importFile" accept="application/json,.json" style="display:none;">
+</header>
+
+<div class="container">
+  <div id="viewMode">
+    <div class="table-wrap">
+      <div class="row head">
+        <div class="cell">Тема</div>
+        <div class="cell">Название страницы</div>
+        <div class="cell">Примечания</div>
+        <div class="cell">Скрин</div>
+      </div>
+      <div id="viewRows"></div>
+    </div>
+    <p class="hint">Клик по названию или миниатюре открывает ссылку в новой вкладке браузера. Записи сгруппированы по темам.</p>
+  </div>
+
+  <div id="editMode" style="display:none;">
+    <div class="table-wrap">
+      <div class="edit-grid head">
+        <div class="cell">Тема</div>
+        <div class="cell">Название страницы</div>
+        <div class="cell">Примечания</div>
+        <div class="cell">Скрин</div>
+      </div>
+      <div id="editRows"></div>
+    </div>
+    <p class="hint">
+      <b>Перетаскивайте строки за ручку ⋮⋮</b>, чтобы менять порядок или переносить в другую тему.
+      Перетащите строку на <b>заголовок группы</b>, чтобы поместить её в эту тему.
+      Введите новое имя темы прямо в заголовке — оно применится ко всем записям группы.
+      Картинку можно вставить из буфера (Ctrl+V), перетащить файл или ввести URL.
+    </p>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'my_links_app_v3';
+  const THUMB_MAX_W = 320;
+  const THUMB_MAX_H = 200;
+  const THUMB_QUALITY = 0.75;
+  const DATA_VERSION = 1;
+
+  let links = loadLinks();
+  let mode = 'view';
+  let searchQuery = '';
+
+  // ---------- Загрузка/сохранение ----------
+  function loadLinks() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+        || localStorage.getItem('my_links_app_v2')
+        || localStorage.getItem('my_links_app_v1');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // поддержка как массива, так и объекта {version, links}
+        const arr = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.links) ? parsed.links : null);
+        if (arr) {
+          return arr.map(normalizeRecord);
+        }
+      }
+    } catch (e) {}
+    return [
+      { id: uid(), theme: 'Поиск',  title: 'Яндекс', url: 'https://ya.ru', note: 'Поисковик', thumb: '' },
+      { id: uid(), theme: 'Работа', title: 'GitHub', url: 'https://github.com', note: 'Код и проекты', thumb: '' }
+    ];
+  }
+
+  function normalizeRecord(l) {
+    return {
+      id: l.id || uid(),
+      theme: l.theme || '',
+      title: l.title || '',
+      url: l.url || '',
+      note: l.note || '',
+      thumb: l.thumb || ''
+    };
+  }
+
+  function saveLinks() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+    } catch (e) {
+      toast('Не удалось сохранить (переполнено хранилище). Уменьшите размер или количество картинок.', 'error', 5000);
+    }
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  // ---------- Тост ----------
+  const toastEl = document.getElementById('toast');
+  let toastTimer = null;
+  function toast(msg, kind, ms) {
+    toastEl.textContent = msg;
+    toastEl.className = 'toast show' + (kind ? ' ' + kind : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastEl.classList.remove('show');
+    }, ms || 2200);
+  }
+
+  // ---------- Сжатие картинки ----------
+  function compressImage(source, maxW, maxH, quality) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        let { width: w, height: h } = img;
+        const ratio = Math.min(maxW / w, maxH / h, 1);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        try {
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } catch (e) {
+          reject(e);
+        }
+      };
+      img.onerror = () => reject(new Error('Не удалось загрузить изображение'));
+      img.src = source;
+    });
+  }
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+      r.readAsDataURL(file);
+    });
+  }
+
+  // ---------- Элементы ----------
+  const viewModeEl = document.getElementById('viewMode');
+  const editModeEl = document.getElementById('editMode');
+  const viewRowsEl = document.getElementById('viewRows');
+  const editRowsEl = document.getElementById('editRows');
+  const searchBox = document.getElementById('searchBox');
+  const addBtn = document.getElementById('addBtn');
+  const modeViewBtn = document.getElementById('modeViewBtn');
+  const modeEditBtn = document.getElementById('modeEditBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importBtn');
+  const importFile = document.getElementById('importFile');
+
+  // ---------- Переключение режимов ----------
+  function setMode(newMode) {
+    mode = newMode;
+    if (mode === 'view') {
+      viewModeEl.style.display = '';
+      editModeEl.style.display = 'none';
+      addBtn.style.display = 'none';
+      modeViewBtn.classList.add('active');
+      modeEditBtn.classList.remove('active');
+      searchBox.style.display = '';
+      renderView();
+    } else {
+      viewModeEl.style.display = 'none';
+      editModeEl.style.display = '';
+      addBtn.style.display = '';
+      modeEditBtn.classList.add('active');
+      modeViewBtn.classList.remove('active');
+      searchBox.style.display = 'none';
+      renderEdit();
+    }
+  }
+
+  modeViewBtn.addEventListener('click', () => setMode('view'));
+  modeEditBtn.addEventListener('click', () => setMode('edit'));
+
+  // ---------- Экспорт / Импорт JSON ----------
+  exportBtn.addEventListener('click', () => {
+    const payload = {
+      app: 'Мои ссылки',
+      version: DATA_VERSION,
+      exportedAt: new Date().toISOString(),
+      links: links
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = 'my-links-' + stamp + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast('Экспортировано: ' + links.length + ' записей', 'success');
+  });
+
+  importBtn.addEventListener('click', () => {
+    importFile.value = '';
+    importFile.click();
+  });
+
+  importFile.addEventListener('change', () => {
+    const file = importFile.files && importFile.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        const arr = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.links) ? parsed.links : null);
+        if (!arr) throw new Error('Не найден массив ссылок в файле');
+        const incoming = arr.map(normalizeRecord);
+        if (incoming.length === 0) {
+          toast('Файл пуст — импорт отменён', 'error');
+          return;
+        }
+        askImportMode(incoming, file.name);
+      } catch (e) {
+        toast('Ошибка чтения файла: ' + e.message, 'error', 4000);
+      }
+    };
+    reader.onerror = () => toast('Не удалось прочитать файл', 'error');
+    reader.readAsText(file);
+  });
+
+  function askImportMode(incoming, fileName) {
+    const total = incoming.length;
+    // Простой выбор через confirm: OK — заменить, Cancel — объединить
+    const replace = confirm(
+      'Импорт файла: ' + fileName + '\n' +
+      'Записей в файле: ' + total + '\n' +
+      'Записей сейчас: ' + links.length + '\n\n' +
+      'OK — ЗАМЕНИТЬ всё текущее содержимое файлом.\n' +
+      'Отмена — ОБЪЕДИНИТЬ (добавить новые записи к текущим).'
+    );
+    if (replace) {
+      links = incoming;
+      saveLinks();
+      renderCurrent();
+      toast('Импортировано с заменой: ' + total + ' записей', 'success');
+    } else {
+      // объединение: добавляем записи, у которых нет совпадения по url+title
+      let added = 0;
+      const keys = new Set(links.map(l => (l.url || '') + '|' + (l.title || '')));
+      incoming.forEach(l => {
+        const key = (l.url || '') + '|' + (l.title || '');
+        if (!keys.has(key)) {
+          // новый id во избежание коллизий
+          links.push({ ...l, id: uid() });
+          keys.add(key);
+          added++;
+        }
+      });
+      saveLinks();
+      renderCurrent();
+      toast('Объединено. Добавлено новых: ' + added, 'success');
+    }
+  }
+
+  function renderCurrent() {
+    if (mode === 'view') renderView();
+    else renderEdit();
+  }
+
+  // ---------- Фильтрация ----------
+  function getFiltered() {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return links;
+    return links.filter(l => {
+      const hay = [l.theme || '', l.title || '', l.url || '', l.note || ''].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  // ---------- Группировка по темам ----------
+  function groupByTheme(list) {
+    const groups = [];
+    const map = new Map();
+    list.forEach(item => {
+      const key = (item.theme || '').trim();
+      if (!map.has(key)) {
+        const g = { theme: key, items: [] };
+        map.set(key, g);
+        groups.push(g);
+      }
+      map.get(key).items.push(item);
+    });
+    groups.sort((a, b) => {
+      if (a.theme === '' && b.theme !== '') return 1;
+      if (a.theme !== '' && b.theme === '') return -1;
+      return 0;
+    });
+    return groups;
+  }
+
+  // ---------- Режим просмотра ----------
+  function renderView() {
+    const list = getFiltered();
+    viewRowsEl.innerHTML = '';
+
+    if (list.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = links.length === 0
+        ? 'Ссылок пока нет. Перейдите в режим «Редактирование» и добавьте первую.'
+        : 'Ничего не найдено по запросу.';
+      viewRowsEl.appendChild(empty);
+      return;
+    }
+
+    const groups = groupByTheme(list);
+
+    groups.forEach(group => {
+      const gh = document.createElement('div');
+      gh.className = 'group-header' + (group.theme === '' ? ' ungrouped' : '');
+      const titleSpan = document.createElement('span');
+      titleSpan.textContent = group.theme === '' ? 'Без темы' : group.theme;
+      gh.appendChild(titleSpan);
+      const cnt = document.createElement('span');
+      cnt.className = 'count';
+      cnt.textContent = '(' + group.items.length + ')';
+      gh.appendChild(cnt);
+      viewRowsEl.appendChild(gh);
+
+      group.items.forEach(link => {
+        const row = document.createElement('div');
+        row.className = 'row';
+
+        const targetUrl = normalizeUrl(link.url);
+        const hasUrl = !!link.url;
+
+        const themeCell = document.createElement('div');
+        themeCell.className = 'cell';
+        const badge = document.createElement('span');
+        badge.className = 'theme-badge' + (link.theme ? '' : ' empty');
+        badge.textContent = link.theme || '—';
+        themeCell.appendChild(badge);
+
+        const titleCell = document.createElement('div');
+        titleCell.className = 'cell';
+        const a = document.createElement('a');
+        a.className = 'link-title';
+        a.textContent = link.title || '(без названия)';
+        a.href = targetUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.title = link.url || '';
+        if (!hasUrl) a.addEventListener('click', (e) => e.preventDefault());
+        titleCell.appendChild(a);
+
+        const noteCell = document.createElement('div');
+        noteCell.className = 'cell';
+        if (link.note) {
+          const span = document.createElement('span');
+          span.className = 'note-text';
+          span.textContent = link.note;
+          noteCell.appendChild(span);
+        }
+
+        const thumbCell = document.createElement('div');
+        thumbCell.className = 'cell';
+        if (link.thumb) {
+          const thumbLink = document.createElement('a');
+          thumbLink.className = 'thumb-link';
+          thumbLink.href = targetUrl;
+          thumbLink.target = '_blank';
+          thumbLink.rel = 'noopener noreferrer';
+          thumbLink.title = link.url || '';
+          if (!hasUrl) thumbLink.addEventListener('click', (e) => e.preventDefault());
+          const img = document.createElement('img');
+          img.className = 'thumb';
+          img.src = link.thumb;
+          img.alt = link.title || '';
+          img.onerror = () => thumbLink.replaceWith(placeholderThumb());
+          thumbLink.appendChild(img);
+          thumbCell.appendChild(thumbLink);
+        } else {
+          thumbCell.appendChild(placeholderThumb());
+        }
+
+        row.appendChild(themeCell);
+        row.appendChild(titleCell);
+        row.appendChild(noteCell);
+        row.appendChild(thumbCell);
+        viewRowsEl.appendChild(row);
+      });
+    });
+  }
+
+  function placeholderThumb() {
+    const div = document.createElement('div');
+    div.className = 'thumb placeholder';
+    div.textContent = '—';
+    return div;
+  }
+
+  function normalizeUrl(url) {
+    if (!url) return '#';
+    if (/^(https?|file|ftp|mailto):/i.test(url)) return url;
+    return 'https://' + url;
+  }
+
+  // ============================================================
+  // РЕЖИМ РЕДАКТИРОВАНИЯ С DRAG & DROP
+  // ============================================================
+
+  let dragState = null;
+
+  function renderEdit() {
+    editRowsEl.innerHTML = '';
+    dragState = null;
+
+    if (links.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'Нет записей. Нажмите «+ Добавить», чтобы создать.';
+      editRowsEl.appendChild(empty);
+      return;
+    }
+
+    const groups = groupByTheme(links);
+
+    groups.forEach(group => {
+      const groupEl = document.createElement('div');
+      groupEl.className = 'edit-group';
+      groupEl.dataset.theme = group.theme;
+
+      const header = document.createElement('div');
+      header.className = 'edit-group-header' + (group.theme === '' ? ' ungrouped' : '');
+
+      const themeInput = document.createElement('input');
+      themeInput.type = 'text';
+      themeInput.placeholder = 'Без темы (введите название)';
+      themeInput.value = group.theme;
+      themeInput.dataset.role = 'group-theme';
+      themeInput.dataset.oldTheme = group.theme;
+      themeInput.addEventListener('change', () => {
+        const newTheme = themeInput.value.trim();
+        const oldTheme = themeInput.dataset.oldTheme;
+        if (newTheme === oldTheme) return;
+        links.forEach(l => {
+          if ((l.theme || '').trim() === oldTheme) l.theme = newTheme;
+        });
+        saveLinks();
+        renderEdit();
+      });
+      header.appendChild(themeInput);
+
+      const cnt = document.createElement('span');
+      cnt.className = 'group-count';
+      cnt.textContent = group.items.length + ' шт.';
+      header.appendChild(cnt);
+
+      header.addEventListener('dragover', (e) => {
+        if (!dragState) return;
+        e.preventDefault();
+        groupEl.classList.add('drop-target');
+      });
+      header.addEventListener('dragleave', (e) => {
+        if (!groupEl.contains(e.relatedTarget)) groupEl.classList.remove('drop-target');
+      });
+      header.addEventListener('drop', (e) => {
+        if (!dragState) return;
+        e.preventDefault();
+        groupEl.classList.remove('drop-target');
+        moveItemToTheme(dragState.id, group.theme, null);
+      });
+
+      groupEl.appendChild(header);
+
+      group.items.forEach(link => {
+        const index = links.indexOf(link);
+        groupEl.appendChild(buildEditRow(link, index));
+      });
+
+      groupEl.addEventListener('dragover', (e) => {
+        if (!dragState) return;
+        e.preventDefault();
+        groupEl.classList.add('drop-target');
+      });
+      groupEl.addEventListener('dragleave', (e) => {
+        if (!groupEl.contains(e.relatedTarget)) groupEl.classList.remove('drop-target');
+      });
+      groupEl.addEventListener('drop', (e) => {
+        if (!dragState) return;
+        e.preventDefault();
+        groupEl.classList.remove('drop-target');
+        moveItemToTheme(dragState.id, group.theme, null);
+      });
+
+      editRowsEl.appendChild(groupEl);
+    });
+  }
+
+  function buildEditRow(link, index) {
+    const wrap = document.createElement('div');
+    wrap.className = 'edit-row-wrap';
+    wrap.dataset.id = link.id;
+    wrap.dataset.theme = link.theme || '';
+
+    const row = document.createElement('div');
+    row.className = 'edit-grid';
+
+    const c0 = document.createElement('div');
+    c0.className = 'cell theme-cell';
+
+    const handle = document.createElement('span');
+    handle.className = 'drag-handle';
+    handle.textContent = '⋮⋮';
+    handle.title = 'Перетащите, чтобы изменить порядок или перенести в другую тему';
+    handle.draggable = true;
+
+    handle.addEventListener('dragstart', (e) => {
+      dragState = { id: link.id, fromIndex: index };
+      wrap.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', link.id); } catch {}
+    });
+    handle.addEventListener('dragend', () => {
+      wrap.classList.remove('dragging');
+      dragState = null;
+      clearDropIndicators();
+      document.querySelectorAll('.edit-group.drop-target').forEach(el => el.classList.remove('drop-target'));
+    });
+
+    const themeInput = document.createElement('input');
+    themeInput.type = 'text';
+    themeInput.placeholder = 'Тема';
+    themeInput.value = link.theme || '';
+    themeInput.dataset.field = 'theme';
+    themeInput.addEventListener('change', () => {
+      const v = themeInput.value.trim();
+      if (v === (link.theme || '')) return;
+      link.theme = v;
+      saveLinks();
+      renderEdit();
+    });
+
+    c0.appendChild(handle);
+    c0.appendChild(themeInput);
+
+    const c1 = document.createElement('div');
+    c1.className = 'cell';
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.placeholder = 'Название';
+    titleInput.value = link.title || '';
+    titleInput.dataset.field = 'title';
+    c1.appendChild(titleInput);
+
+    const c2 = document.createElement('div');
+    c2.className = 'cell';
+    const noteInput = document.createElement('textarea');
+    noteInput.placeholder = 'Примечание (необязательно)';
+    noteInput.value = link.note || '';
+    noteInput.dataset.field = 'note';
+    c2.appendChild(noteInput);
+
+    const c3 = document.createElement('div');
+    c3.className = 'cell';
+    c3.appendChild(buildThumbEditor(link));
+
+    row.appendChild(c0);
+    row.appendChild(c1);
+    row.appendChild(c2);
+    row.appendChild(c3);
+
+    const row2 = document.createElement('div');
+    row2.className = 'edit-grid';
+    row2.style.borderBottom = '1px solid #ece6d8';
+    row2.style.background = '#faf7ef';
+
+    const urlCell = document.createElement('div');
+    urlCell.className = 'cell';
+    urlCell.style.gridColumn = '1 / span 3';
+    const urlInput = document.createElement('input');
+    urlInput.type = 'text';
+    urlInput.placeholder = 'Адрес ссылки (URL)';
+    urlInput.value = link.url || '';
+    urlInput.dataset.field = 'url';
+    urlCell.appendChild(urlInput);
+
+    const actionsCell = document.createElement('div');
+    actionsCell.className = 'cell actions';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn small';
+    saveBtn.textContent = '💾';
+    saveBtn.title = 'Сохранить';
+    saveBtn.addEventListener('click', () => saveRow(link.id, row, row2));
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn small danger';
+    delBtn.textContent = '✕';
+    delBtn.title = 'Удалить';
+    delBtn.addEventListener('click', () => {
+      if (confirm('Удалить запись «' + (link.title || 'без названия') + '»?')) {
+        const i = links.findIndex(l => l.id === link.id);
+        if (i >= 0) links.splice(i, 1);
+        saveLinks();
+        renderEdit();
+      }
+    });
+
+    actionsCell.appendChild(saveBtn);
+    actionsCell.appendChild(delBtn);
+    row2.appendChild(urlCell);
+    row2.appendChild(actionsCell);
+
+    wrap.addEventListener('dragover', (e) => {
+      if (!dragState || dragState.id === link.id) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = wrap.getBoundingClientRect();
+      const above = (e.clientY - rect.top) < rect.height / 2;
+      clearDropIndicators();
+      wrap.classList.add(above ? 'drop-indicator-above' : 'drop-indicator-below');
+      document.querySelectorAll('.edit-group.drop-target').forEach(el => el.classList.remove('drop-target'));
+    });
+    wrap.addEventListener('dragleave', (e) => {
+      if (!wrap.contains(e.relatedTarget)) {
+        wrap.classList.remove('drop-indicator-above', 'drop-indicator-below');
+      }
+    });
+    wrap.addEventListener('drop', (e) => {
+      if (!dragState || dragState.id === link.id) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = wrap.getBoundingClientRect();
+      const above = (e.clientY - rect.top) < rect.height / 2;
+      wrap.classList.remove('drop-indicator-above', 'drop-indicator-below');
+      moveItemNear(dragState.id, link.id, above);
+    });
+
+    wrap.appendChild(row);
+    wrap.appendChild(row2);
+    return wrap;
+  }
+
+  function clearDropIndicators() {
+    document.querySelectorAll('.drop-indicator-above, .drop-indicator-below')
+      .forEach(el => el.classList.remove('drop-indicator-above', 'drop-indicator-below'));
+  }
+
+  function moveItemToTheme(itemId, theme, beforeId) {
+    const fromIdx = links.findIndex(l => l.id === itemId);
+    if (fromIdx < 0) return;
+    const item = links.splice(fromIdx, 1)[0];
+    item.theme = theme || '';
+
+    if (beforeId) {
+      const toIdx = links.findIndex(l => l.id === beforeId);
+      if (toIdx >= 0) links.splice(toIdx, 0, item);
+      else links.push(item);
+    } else {
+      let lastIdx = -1;
+      for (let i = 0; i < links.length; i++) {
+        if ((links[i].theme || '').trim() === item.theme) lastIdx = i;
+      }
+      if (lastIdx >= 0) links.splice(lastIdx + 1, 0, item);
+      else links.push(item);
+    }
+    saveLinks();
+    renderEdit();
+  }
+
+  function moveItemNear(itemId, targetId, above) {
+    if (itemId === targetId) return;
+    const fromIdx = links.findIndex(l => l.id === itemId);
+    if (fromIdx < 0) return;
+    const target = links.find(l => l.id === targetId);
+    if (!target) return;
+
+    const item = links.splice(fromIdx, 1)[0];
+    item.theme = target.theme || '';
+
+    let toIdx = links.findIndex(l => l.id === targetId);
+    if (toIdx < 0) toIdx = links.length;
+    if (!above) toIdx += 1;
+
+    links.splice(toIdx, 0, item);
+    saveLinks();
+    renderEdit();
+  }
+
+  function buildThumbEditor(link) {
+    const wrap = document.createElement('div');
+    wrap.className = 'thumb-editor';
+
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.dataset.field = 'thumb';
+    hidden.value = link.thumb || '';
+    wrap.appendChild(hidden);
+
+    const box = document.createElement('div');
+    box.className = 'thumb-preview-box';
+    box.title = 'Клик — выбрать файл. Перетащите файл или вставьте Ctrl+V.';
+
+    const renderPreview = () => {
+      box.innerHTML = '';
+      const val = hidden.value;
+      if (val) {
+        const img = document.createElement('img');
+        img.src = val;
+        img.alt = '';
+        img.onerror = () => {
+          box.innerHTML = '<span class="hint-inline">Ошибка загрузки</span>';
+        };
+        box.appendChild(img);
+      } else {
+        const hint = document.createElement('span');
+        hint.className = 'hint-inline';
+        hint.textContent = 'Ctrl+V / файл / URL';
+        box.appendChild(hint);
+      }
+    };
+    renderPreview();
+    wrap.appendChild(box);
+
+    const btns = document.createElement('div');
+    btns.className = 'thumb-buttons';
+
+    const fileBtn = document.createElement('button');
+    fileBtn.className = 'btn small secondary';
+    fileBtn.type = 'button';
+    fileBtn.textContent = 'Файл';
+
+    const urlBtn = document.createElement('button');
+    urlBtn.className = 'btn small secondary';
+    urlBtn.type = 'button';
+    urlBtn.textContent = 'URL';
+
+    const pasteBtn = document.createElement('button');
+    pasteBtn.className = 'btn small secondary';
+    pasteBtn.type = 'button';
+    pasteBtn.textContent = 'Вставка';
+
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'btn small danger';
+    clearBtn.type = 'button';
+    clearBtn.textContent = '✕';
+
+    btns.appendChild(fileBtn);
+    btns.appendChild(urlBtn);
+    btns.appendChild(pasteBtn);
+    btns.appendChild(clearBtn);
+    wrap.appendChild(btns);
+
+    const hint = document.createElement('div');
+    hint.className = 'paste-hint';
+    hint.textContent = 'Ctrl+V — вставить из буфера';
+    wrap.appendChild(hint);
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    wrap.appendChild(fileInput);
+
+    const setImageFromFile = async (file) => {
+      if (!file || !file.type.startsWith('image/')) {
+        alert('Это не изображение.');
+        return;
+      }
+      try {
+        const dataUrl = await fileToDataURL(file);
+        const compressed = await compressImage(dataUrl, THUMB_MAX_W, THUMB_MAX_H, THUMB_QUALITY);
+        hidden.value = compressed;
+        renderPreview();
+      } catch (e) {
+        alert('Не удалось обработать картинку: ' + e.message);
+      }
+    };
+
+    box.addEventListener('click', () => fileInput.click());
+    fileBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', async () => {
+      if (fileInput.files && fileInput.files[0]) {
+        await setImageFromFile(fileInput.files[0]);
+      }
+      fileInput.value = '';
+    });
+
+    urlBtn.addEventListener('click', () => {
+      const url = prompt('Введите URL картинки:', hidden.value.startsWith('data:') ? '' : hidden.value);
+      if (url === null) return;
+      const trimmed = url.trim();
+      if (!trimmed) return;
+      compressImage(trimmed, THUMB_MAX_W, THUMB_MAX_H, THUMB_QUALITY)
+        .then(compressed => { hidden.value = compressed; renderPreview(); })
+        .catch(() => { hidden.value = trimmed; renderPreview(); });
+    });
+
+    pasteBtn.addEventListener('click', async () => {
+      try {
+        await pasteFromClipboard();
+      } catch (e) {
+        alert('Не удалось получить доступ к буферу обмена. Используйте Ctrl+V.');
+      }
+    });
+
+    async function pasteFromClipboard() {
+      if (!navigator.clipboard || !navigator.clipboard.read) {
+        alert('Браузер не поддерживает чтение буфера обмена. Нажмите Ctrl+V в поле миниатюры.');
+        return;
+      }
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const imageType = item.types.find(t => t.startsWith('image/'));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          await setImageFromFile(new File([blob], 'clipboard.png', { type: imageType }));
+          return;
+        }
+      }
+      alert('В буфере обмена нет картинки.');
+    }
+
+    const onPaste = async (e) => {
+      const items = (e.clipboardData && e.clipboardData.items) || [];
+      for (const it of items) {
+        if (it.type && it.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = it.getAsFile();
+          await setImageFromFile(file);
+          return;
+        }
+      }
+    };
+    box.tabIndex = 0;
+    box.addEventListener('paste', onPaste);
+    wrap.addEventListener('paste', onPaste);
+
+    box.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      box.classList.add('dragover');
+    });
+    box.addEventListener('dragleave', () => box.classList.remove('dragover'));
+    box.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      box.classList.remove('dragover');
+      const dt = e.dataTransfer;
+      if (!dt) return;
+      if (dt.files && dt.files[0]) {
+        await setImageFromFile(dt.files[0]);
+      } else {
+        const url = dt.getData('text/uri-list') || dt.getData('text/plain');
+        if (url) {
+          try {
+            const compressed = await compressImage(url, THUMB_MAX_W, THUMB_MAX_H, THUMB_QUALITY);
+            hidden.value = compressed;
+            renderPreview();
+          } catch {
+            hidden.value = url;
+            renderPreview();
+          }
+        }
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      hidden.value = '';
+      renderPreview();
+    });
+
+    return wrap;
+  }
+
+  function saveRow(itemId, row, row2) {
+    const idx = links.findIndex(l => l.id === itemId);
+    if (idx < 0) return;
+    const link = links[idx];
+
+    const theme = row.querySelector('[data-field="theme"]').value.trim();
+    const title = row.querySelector('[data-field="title"]').value.trim();
+    const note = row.querySelector('[data-field="note"]').value.trim();
+    const thumb = row.querySelector('[data-field="thumb"]').value;
+    const url = row2.querySelector('[data-field="url"]').value.trim();
+
+    if (!title && !url) {
+      alert('Введите хотя бы название или адрес ссылки.');
+      return;
+    }
+
+    links[idx] = {
+      ...link,
+      theme: theme,
+      title: title || url,
+      url: url,
+      note: note,
+      thumb: thumb
+    };
+    saveLinks();
+
+    if (theme !== (link.theme || '')) {
+      renderEdit();
+      return;
+    }
+
+    const btn = row2.querySelector('.btn.small');
+    const old = btn.textContent;
+    btn.textContent = '✓';
+    setTimeout(() => { btn.textContent = old; }, 800);
+  }
+
+  addBtn.addEventListener('click', () => {
+    links.push({
+      id: uid(),
+      theme: '',
+      title: '',
+      url: '',
+      note: '',
+      thumb: ''
+    });
+    saveLinks();
+    renderEdit();
+    const wraps = editRowsEl.querySelectorAll('.edit-row-wrap');
+    if (wraps.length) {
+      const last = wraps[wraps.length - 1];
+      const titleInput = last.querySelector('[data-field="title"]');
+      if (titleInput) titleInput.focus();
+      last.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  searchBox.addEventListener('input', (e) => {
+    searchQuery = e.target.value;
+    renderView();
+  });
+
+  setMode('view');
+
+  // ---------- Регистрация Service Worker для PWA ----------
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((e) => {
+        // тихо игнорируем — например, при открытии через file://
+        console.warn('SW register failed:', e);
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>
